@@ -3,7 +3,7 @@
 # Material parameters: 14,
 # * Elasticity: mu1, mu2, alph1, alph2,
 # * Viscoelasticity: m1, m2, a1, a2, K1, K2, beta1, beta2, eta_0, etaInf
-# Each of the function has corresponding docstring
+# Each of the functions has corresponding docstring
 import os
 from dolfin import *
 import numpy as np
@@ -45,9 +45,9 @@ frontFace = CompiledSubDomain("near(x[2],1.) && on_boundary")
 
 def freeEnergy(u, Cv):
     """[summary]
-        Given, `u` and `Cv` this function 
+        Given, `u` and `Cv` this function
         calculates the sum of equilibrium and non-equilibrium
-        free energies 
+        free energies
     Args:
         u ([dolfin.Function]): [FE displacement field]
         Cv ([dolfin.Function]): [FE internal variable]
@@ -59,17 +59,16 @@ def freeEnergy(u, Cv):
     C = F.T * F
     J = det(F)
     I1 = tr(C)
-    Ce = C*inv(Cv)
+    Ce = C * inv(Cv)
     Ie1 = tr(Ce)
-    Je = J/sqrt(det(Cv))
+    Je = J / sqrt(det(Cv))
 
-    psiEq = 3**(1-alph1)/(2.*alph1) * mu1 * (I1**alph1 - 3**alph1) + 3**(1-alph2) / \
-        (2.*alph2) * mu2 * (I1**alph2 - 3**alph2) - \
-        (mu1 + mu2) * ln(J) + mu_pr/2*(J-1)**2
+    psiEq = 3**(1 - alph1) / (2. * alph1) * mu1 * (I1**alph1 - 3**alph1) + 3**(1 - alph2) / \
+        (2. * alph2) * mu2 * (I1**alph2 - 3**alph2) - \
+        (mu1 + mu2) * ln(J) + mu_pr / 2 * (J - 1)**2
 
-    psiNeq = 3**(1-a1)/(2.*a1) * m1 * (Ie1**a1 - 3**a1) + 3**(1-a2)/(2.*a2) * \
-        m2 * (Ie1**a2 - 3**a2) - (m1 + m2) * \
-        ln(Je)
+    psiNeq = 3**(1 - a1) / (2. * a1) * m1 * (Ie1**a1 - 3**a1) + \
+        3**(1 - a2) / (2. * a2) * m2 * (Ie1**a2 - 3**a2) - (m1 + m2) * ln(Je)
 
     return psiEq + psiNeq
 
@@ -77,7 +76,7 @@ def freeEnergy(u, Cv):
 def stressPiola(u, Cv):
     """[summary]
         Given `u` and `Cv` this function calculates
-        the first Piola-Kirchhoff stress 
+        the first Piola-Kirchhoff stress
     Args:
         u ([dolfin.Function]): [FE displacement field]
         Cv ([dolfin.Function]): [FE internal variable]
@@ -93,11 +92,11 @@ def stressPiola(u, Cv):
     Finv = inv(F)
     I1 = tr(C)
     J = det(F)
-    Ce = C*inv(Cv)
+    Ce = C * inv(Cv)
     Ie1 = tr(Ce)
-    SEq = (mu1 * (I1/3.)**(alph1 - 1) + mu2 * (I1/3.)**(alph2 - 1)) * \
-        F - (mu1 + mu2) * Finv.T + mu_pr * J * (J-1.) * Finv.T
-    SNeq = (m1 * (Ie1/3.)**(a1-1.) + m2 * (Ie1/3.)**(a2-1)) * F * \
+    SEq = (mu1 * (I1 / 3.)**(alph1 - 1) + mu2 * (I1 / 3.)**(alph2 - 1)) * \
+        F - (mu1 + mu2) * Finv.T + mu_pr * J * (J - 1.) * Finv.T
+    SNeq = (m1 * (Ie1 / 3.)**(a1 - 1.) + m2 * (Ie1 / 3.)**(a2 - 1)) * F * \
         inv(Cv) - (m1 + m2) * Finv.T
 
     return SEq + SNeq
@@ -106,7 +105,7 @@ def stressPiola(u, Cv):
 def evolEqG(u, Cv):
     """[summary]
         Given `u` and `Cv` this function calculates the
-        RHS of the evolution equation G(C, Cv) as described 
+        RHS of the evolution equation G(C, Cv) as described
         in the paper referenced above
     Args:
         u ([dolfin.Function]): [FE displacement field]
@@ -118,15 +117,15 @@ def evolEqG(u, Cv):
     F = Identity(len(u)) + grad(u)
     C = F.T * F
     Iv1 = tr(Cv)
-    Ce = C*inv(Cv)
-    CvinvC = inv(Cv)*C
+    Ce = C * inv(Cv)
+    CvinvC = inv(Cv) * C
     Ie1 = tr(Ce)
 
     # define etaK
-    A2 = m1*(Ie1/3)**(a1 - 1) + m2 * (Ie1/3)**(a2 - 1)
+    A2 = m1 * (Ie1 / 3)**(a1 - 1) + m2 * (Ie1 / 3)**(a2 - 1)
 
-    G = A2 / (etaInf + (eta0 - etaInf + K1 * (Iv1**bta1 - 3**bta1))/(1 + (K2 *
-                                                                          ((-Ie1**2/6. + 1./2 * inner(CvinvC, Ce))*A2**2))**bta2)) * (C - Ie1/3. * Cv)
+    G = A2 / (etaInf + (eta0 - etaInf + K1 * (Iv1**bta1 - 3**bta1)) / (1 + (K2 * \
+              ((-Ie1**2 / 6. + 1. / 2 * inner(CvinvC, Ce)) * A2**2))**bta2)) * (C - Ie1 / 3. * Cv)
     G = local_project(G, VQe)
     return G
 
@@ -134,7 +133,7 @@ def evolEqG(u, Cv):
 def k_terms(dt, u, un, Cvn):
     """[summary]
         Given u(tn), Cv(tn), u(t_k, r) and dt this function
-        calculates the terms k_i (i=1 to 6) as described in 
+        calculates the terms k_i (i=1 to 6) as described in
         the paper above
     Args:
         dt ([float]): [time incremement]
@@ -145,17 +144,18 @@ def k_terms(dt, u, un, Cvn):
     Returns:
         [k1 + ... + k6]: [ufl.algebra.Sum]
     """
-    un_quart = un + 0.25*(u-un)
-    un_half = un + 0.5*(u-un)
-    un_thr_quart = un + 0.75 * (u-un)
+    un_quart = un + 0.25 * (u - un)
+    un_half = un + 0.5 * (u - un)
+    un_thr_quart = un + 0.75 * (u - un)
     k1 = evolEqG(un, Cvn)
-    k2 = evolEqG(un_half, Cvn + k1*dt/2)
-    k3 = evolEqG(un_quart, Cvn + 1./16*dt*(3*k1+k2))
-    k4 = evolEqG(un_half, Cvn + dt/2.*k3)
-    k5 = evolEqG(un_thr_quart, Cvn + 3./16*dt*(-k2 + 2.*k3 + 3.*k4))
-    k6 = evolEqG(u, Cvn + (k1 + 4.*k2 + 6.*k3 - 12.*k4 + 8.*k5 * dt/7.))
+    k2 = evolEqG(un_half, Cvn + k1 * dt / 2)
+    k3 = evolEqG(un_quart, Cvn + 1. / 16 * dt * (3 * k1 + k2))
+    k4 = evolEqG(un_half, Cvn + dt / 2. * k3)
+    k5 = evolEqG(un_thr_quart, Cvn + 3. / 16 * dt * (-k2 + 2. * k3 + 3. * k4))
+    k6 = evolEqG(u, Cvn + (k1 + 4. * k2 + 6. *
+                 k3 - 12. * k4 + 8. * k5 * dt / 7.))
 
-    kfinal = dt/90*(7*k1 + 32*k3 + 12*k4 + 32*k5 + 7*k6)
+    kfinal = dt / 90 * (7 * k1 + 32 * k3 + 12 * k4 + 32 * k5 + 7 * k6)
     kfinal = local_project(kfinal, VQe)
     return kfinal
 
@@ -163,7 +163,7 @@ def k_terms(dt, u, un, Cvn):
 def local_project(v, V):
     """[summary]
         Helper function to do a local projection element-wise
-        Useful for DG-spaces since the projection can be done 
+        Useful for DG-spaces since the projection can be done
         for all the elements in parallel
     Args:
         v ([dolfin.Funcion]): [function to be projected]
@@ -174,8 +174,8 @@ def local_project(v, V):
     """
     dv = TrialFunction(V)
     v_ = TestFunction(V)
-    a_proj = inner(dv, v_)*dx(metadata=metadata)
-    b_proj = inner(v, v_)*dx(metadata=metadata)
+    a_proj = inner(dv, v_) * dx(metadata=metadata)
+    b_proj = inner(v, v_) * dx(metadata=metadata)
     solver = LocalSolver(a_proj, b_proj)
     solver.factorize()
     u = Function(V)
@@ -254,13 +254,13 @@ bcs = [bcBack, bcFront_y, bcFront_z, bcFront_x]
 kap_by_mu = 10.**3
 
 # VHB4910
-mu1 = Constant(13.54*10**3)
+mu1 = Constant(13.54 * 10**3)
 mu2 = Constant(1.08 * 10**3)
-mu_pr = Constant(kap_by_mu*(mu1 + mu2))  # make this value very high
+mu_pr = Constant(kap_by_mu * (mu1 + mu2))  # make this value very high
 alph1 = Constant(1.)
 alph2 = Constant(-2.474)
 m1 = Constant(5.42 * 10**3)
-m2 = Constant(20.78*10**3)
+m2 = Constant(20.78 * 10**3)
 a1 = Constant(-10.)
 a2 = Constant(1.948)
 K1 = Constant(3507 * 10**3)
@@ -289,15 +289,15 @@ etaInf = Constant(0.1 * 10**3)  # 0.1
 # etaInf = Constant(0.1* 10**6)  #0.1
 
 
-qvals = (mu1+mu2+m1+m2)
+qvals = (mu1 + mu2 + m1 + m2)
 ldot = 0.01
-timeVals = np.linspace(0, 4./ldot, 103)
+timeVals = np.linspace(0, 4. / ldot, 103)
 dt = timeVals[1] - timeVals[0]
-stretchVals = np.hstack((ldot*timeVals[:len(timeVals)//2], ldot *
-                         (-timeVals[len(timeVals)//2:] + 2*timeVals[len(timeVals)//2])))
+stretchVals = np.hstack((ldot * timeVals[:len(timeVals) // 2], ldot *
+                         (-timeVals[len(timeVals) // 2:] + 2 * timeVals[len(timeVals) // 2])))
 h = FacetArea(msh)
-h_avg = 1./2*(h('+') + h('-'))  # can also use avg(h)
-a_uv = derivative(freeEnergy(u, Cv), u, delu)*dx + qvals / \
+h_avg = 1. / 2 * (h('+') + h('-'))  # can also use avg(h)
+a_uv = derivative(freeEnergy(u, Cv), u, delu) * dx + qvals / \
     h_avg * inner(jump(u), jump(delu)) * dS
 
 Jac = derivative(a_uv, u, utrial)
@@ -339,7 +339,10 @@ for i, tk in enumerate(timeVals):
         Cviter = local_project(Cviter, VQe)
         iterCount += 1
         norm_delCv = norm(Cvtrial.vector() - Cviter.vector())
-        print("Staggered Iteration: {}, Norm = {}".format(iterCount, norm_delCv))
+        print(
+            "Staggered Iteration: {}, Norm = {}".format(
+                iterCount,
+                norm_delCv))
 
     un.assign(u)
     Cvn.assign(Cviter)
@@ -356,5 +359,5 @@ for i, tk in enumerate(timeVals):
 
 # save results for plotting
 np.savetxt(f'SvL_{ldot}.txt', np.vstack(
-    (1.+stretchVals, sPiolaVals[:, 2])))
-np.savetxt('Lvt_{ldot}.txt', np.vstack((timeVals, 1.+stretchVals)))
+    (1. + stretchVals, sPiolaVals[:, 2])))
+np.savetxt('Lvt_{ldot}.txt', np.vstack((timeVals, 1. + stretchVals)))
