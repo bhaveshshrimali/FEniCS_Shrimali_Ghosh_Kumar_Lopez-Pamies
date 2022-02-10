@@ -153,7 +153,7 @@ def k_terms(dt, u, un, Cvn):
     k4 = evolEqG(un_half, Cvn + dt / 2. * k3)
     k5 = evolEqG(un_thr_quart, Cvn + 3. / 16 * dt * (-k2 + 2. * k3 + 3. * k4))
     k6 = evolEqG(u, Cvn + (k1 + 4. * k2 + 6. *
-                 k3 - 12. * k4 + 8. * k5 * dt / 7.))
+                 k3 - 12. * k4 + 8. * k5 )* dt / 7.)
 
     kfinal = dt / 90 * (7 * k1 + 32 * k3 + 12 * k4 + 32 * k5 + 7 * k6)
     kfinal = local_project(kfinal, VQe)
@@ -245,11 +245,13 @@ un.vector()[:] = 0.
 Cv.assign(project(Identity(3), VQe))
 Cvn.assign(project(Identity(3), VQe))
 strtch = Constant(0.)
-bcBack = DirichletBC(W, Constant((0., 0, 0)), back)
-bcFront_z = DirichletBC(W.sub(2), strtch, frontFace)
-bcFront_y = DirichletBC(W.sub(1), Constant(0.), frontFace)
-bcFront_x = DirichletBC(W.sub(0), Constant(0.), frontFace)
-bcs = [bcBack, bcFront_y, bcFront_z, bcFront_x]
+bcl = DirichletBC(W.sub(0), Constant(0), left)
+bcb = DirichletBC(W.sub(1), Constant(0.), bottom)
+bcback = DirichletBC(W.sub(2), Constant(0.), back)
+bacFront = DirichletBC(W.sub(2), strtch, frontFace)
+bcs = [
+    bcl, bcb, bcback, bacFront
+]
 
 kap_by_mu = 10.**3
 
@@ -290,8 +292,10 @@ etaInf = Constant(0.1 * 10**3)  # 0.1
 
 
 qvals = (mu1 + mu2 + m1 + m2)
-ldot = 0.01
-timeVals = np.linspace(0, 4. / ldot, 103)
+ldot = 0.05
+target_stretch = 3.0
+Tfinal = (target_stretch-1.)/ldot * 2.
+timeVals = np.linspace(0, Tfinal, 1003)
 dt = timeVals[1] - timeVals[0]
 stretchVals = np.hstack((ldot * timeVals[:len(timeVals) // 2], ldot *
                          (-timeVals[len(timeVals) // 2:] + 2 * timeVals[len(timeVals) // 2])))
@@ -320,6 +324,8 @@ wfil = XDMFFile('disp_Visco_0_05_realEta_Fixed.xdmf')
 wfil.parameters["flush_output"] = True
 wfil.parameters["functions_share_mesh"] = True
 wfil.parameters["rewrite_function_mesh"] = False
+
+pt = (0.5, 0.5, 0.5)
 
 for i, tk in enumerate(timeVals):
     strtch.assign(stretchVals[i])
@@ -350,14 +356,18 @@ for i, tk in enumerate(timeVals):
 
     uplot.assign(project(un, Vplot))
     Cvplot.assign(local_project(Cvn, VQePlot))
-    u_at_111 = evaluate_function(uplot, (1, 1, 1))
-    s_at_111 = evaluate_function(stressplot, (1, 1, 1))
+    u_at_111 = evaluate_function(uplot, pt)
+    s_at_111 = evaluate_function(stressplot, pt)
     wfil.write(uplot, tk)
     wfil.write(Cvplot, tk)
     dispVals[i] = np.array([u_at_111[0], u_at_111[1], u_at_111[2]], float)
     sPiolaVals[i] = np.array([s_at_111[0], s_at_111[4], s_at_111[8]], float)
 
 # save results for plotting
-np.savetxt(f'SvL_{ldot}.txt', np.vstack(
+np.savetxt(f'SvL_{ldot:.2f}.txt', np.vstack(
     (1. + stretchVals, sPiolaVals[:, 2])))
-np.savetxt('Lvt_{ldot}.txt', np.vstack((timeVals, 1. + stretchVals)))
+np.savetxt(f'Lvt_{ldot:.2f}.txt', np.vstack((timeVals, 1. + stretchVals)))
+from matplotlib import pyplot as plt
+plt.plot(1+stretchVals, sPiolaVals[:, 2])
+plt.savefig("testVHB.png")
+print(f"dt: {timeVals[1] - timeVals[0]:.4f}")
