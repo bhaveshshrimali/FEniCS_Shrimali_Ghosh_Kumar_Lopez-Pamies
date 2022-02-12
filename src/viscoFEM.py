@@ -16,19 +16,19 @@ parameters["form_compiler"]["representation"] = "uflacs"
 parameters["ghost_mode"] = "shared_facet"
 
 ffc_options = {"optimize": True,
-               "eliminate_zeros": True,
-               "precompute_basis_const": True,
-               "precompute_ip_const": True}
+            "eliminate_zeros": True,
+            "precompute_basis_const": True,
+            "precompute_ip_const": True}
 metadata = {"quadrature_degree": 3}
 snes_solver_parameters = {"nonlinear_solver": "snes",
-                          "snes_solver": {"linear_solver": "lu",
-                                          "preconditioner": "petsc_amg",
-                                          "maximum_iterations": 20,
-                                          "report": True,
-                                          "line_search": 'basic',
-                                          "error_on_nonconvergence": False,
-                                          "relative_tolerance": 1e-7,
-                                          "absolute_tolerance": 1e-8}}
+                        "snes_solver": {"linear_solver": "lu",
+                                        "preconditioner": "petsc_amg",
+                                        "maximum_iterations": 20,
+                                        "report": True,
+                                        "line_search": 'basic',
+                                        "error_on_nonconvergence": False,
+                                        "relative_tolerance": 1e-7,
+                                        "absolute_tolerance": 1e-8}}
 
 comm = MPI.comm_world
 
