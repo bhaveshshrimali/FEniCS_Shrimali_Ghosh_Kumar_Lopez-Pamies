@@ -139,9 +139,7 @@ def k_terms(dt, C, Cn, Cvn, Cn_quart, Cn_half, Cn_thr_quart, Cv, k_cache):
     Cn_quart.vector.axpy(1.0, Cn.vector + 0.25 * (C.vector - Cn.vector))
     Cn_half.vector.axpy(1.0, Cn.vector + 0.5 * (C.vector - Cn.vector))
     Cn_thr_quart.vector.axpy(1.0, Cn.vector + 0.75 * (C.vector - Cn.vector))
-    # Cn_quart = Cn + 0.25 * (C - Cn)
-    # Cn_half = Cn + 0.5 * (C - Cn)
-    # Cn_thr_quart = Cn + 0.75 * (C - Cn)
+
     Cn_thr_quart.x.scatter_forward()
     Cn_quart.x.scatter_forward()
     Cn_half.x.scatter_forward()
@@ -158,14 +156,11 @@ def k_terms(dt, C, Cn, Cvn, Cn_quart, Cn_half, Cn_thr_quart, Cv, k_cache):
     k5.x.scatter_forward()
     evolEqG(C, Cvn + (k1 + 4.0 * k2 + 6.0 * k3 - 12.0 * k4 + 8.0 * k5) * dt / 7.0, k6)
     k6.x.scatter_forward()
-    # print(type(k1.vector))
 
     # copy Cvn into Cv to start the update
     with Cv.vector.localForm() as cv, Cvn.vector.localForm() as cvn:
         cvn.copy(cv)
-    # Cv.vector.axpy(1.0, Cvn.vector)
-    # Cv.x.scatter_forward()
-    # print(type(Cv.vector))
+
     Cv.vector.axpby(
         dt / 90.0,
         1.0,
@@ -178,7 +173,6 @@ def k_terms(dt, C, Cn, Cvn, Cn_quart, Cn_half, Cn_thr_quart, Cv, k_cache):
         ),
     )
     Cv.x.scatter_forward()
-    # project(kfinal, Cv, degree=metadata["quadrature_degree"])
     return 1
 
 
@@ -283,7 +277,7 @@ plt.close()
 
 # stabilization parameters
 h = FacetArea(mesh)
-h_avg = avg(h)  # can also use avg(h)
+h_avg = avg(h)  
 
 
 # new variable name to take derivatives
