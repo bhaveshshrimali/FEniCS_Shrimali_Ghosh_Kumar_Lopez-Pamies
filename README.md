@@ -1,12 +1,12 @@
 # FEniCS_Shrimali_Ghosh_Kumar_Lopez-Pamies
-FEniCS code describing the numerical implementation of a finite viscoelastic model (Non Gaussian rubber with nonlinear viscosity).
-Check out our recent publication incorporating a Neo-Hookean version (with constant viscosity) of this above model in
+FEniCS code describing the numerical implementation of a finite viscoelastic model (nearly incompressible Non Gaussian rubber with nonlinear viscosity).
+Check out our recent publication incorporating a Neo-Hookean version (with constant viscosity) of this model in
 a homogenization setting: http://pamies.cee.illinois.edu/Publications_files/JElast2021.pdf
 
 <p style="text-align:center;"><img src="data/stress.png" alt="Logo" width="400"></p><p style="text-align:center;"><img src="data/data.gif" alt="Logo" width="600"></p>
 
 ## Model validation
-Above is a schematic of a finite element calculation for a uniaxial loading of a unit cube with transverse surfaces traction free.
+Above is a schematic of a finite element calculation for a uniaxial loading (along the x-axis) of a unit cube with transverse surfaces set traction free.
 
 The main file [`src/viscoFEM.py`](src/viscoFEM.py) contains all the functions with corresponding docstrings. An updated version (ported to `dolfinx`) is available at [`src/viscoFEM_dolfinx.py`](src/viscoFEM_dolfinx.py)
 
