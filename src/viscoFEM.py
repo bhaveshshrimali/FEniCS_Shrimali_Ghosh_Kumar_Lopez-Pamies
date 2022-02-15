@@ -153,7 +153,7 @@ def k_terms(dt, u, un, Cvn):
     k4 = evolEqG(un_half, Cvn + dt / 2. * k3)
     k5 = evolEqG(un_thr_quart, Cvn + 3. / 16 * dt * (-k2 + 2. * k3 + 3. * k4))
     k6 = evolEqG(u, Cvn + (k1 + 4. * k2 + 6. *
-                 k3 - 12. * k4 + 8. * k5 )* dt / 7.)
+                 k3 - 12. * k4 + 8. * k5 ) * dt / 7.)
 
     kfinal = dt / 90 * (7 * k1 + 32 * k3 + 12 * k4 + 32 * k5 + 7 * k6)
     kfinal = local_project(kfinal, VQe)
