@@ -5,6 +5,9 @@ a homogenization setting: http://pamies.cee.illinois.edu/Publications_files/JEla
 
 <p style="text-align:center;"><img src="data/stress.png" alt="Logo" width="400"></p><p style="text-align:center;"><img src="data/data.gif" alt="Logo" width="600"></p>
 
+## Model validation
+Above is a schematic of a finite element calculation for a uniaxial loading of a unit cube with transverse surfaces traction free.
+
 The main file [`src/viscoFEM.py`](src/viscoFEM.py) contains all the functions with corresponding docstrings. An updated version (ported to `dolfinx`) is available at [`src/viscoFEM_dolfinx.py`](src/viscoFEM_dolfinx.py)
 
 ## Citation (bib)
